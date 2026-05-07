@@ -1,0 +1,1687 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Architektur & Fassade</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f6f1ea;
+      --surface: rgba(255, 250, 245, 0.86);
+      --surface-strong: #fffaf4;
+      --ink: #2f241d;
+      --muted: #66584d;
+      --line: rgba(91, 70, 52, 0.14);
+      --accent: #a47446;
+      --accent-deep: #7d5636;
+      --shadow: 0 24px 60px rgba(59, 40, 24, 0.16);
+      --radius-lg: 28px;
+      --radius-md: 18px;
+      --max: 1180px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Manrope", sans-serif;
+      color: var(--ink);
+      background: #ffffff;
+      overflow-x: hidden;
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button {
+      font: inherit;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .grain {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.05;
+      background-image:
+        linear-gradient(transparent 0, rgba(255,255,255,0.16) 100%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cg fill='%237b644f' fill-opacity='.22'%3E%3Ccircle cx='12' cy='10' r='1'/%3E%3Ccircle cx='62' cy='44' r='1'/%3E%3Ccircle cx='88' cy='16' r='1'/%3E%3Ccircle cx='130' cy='42' r='1'/%3E%3Ccircle cx='32' cy='86' r='1'/%3E%3Ccircle cx='78' cy='72' r='1'/%3E%3Ccircle cx='142' cy='96' r='1'/%3E%3Ccircle cx='16' cy='132' r='1'/%3E%3Ccircle cx='70' cy='126' r='1'/%3E%3Ccircle cx='120' cy='148' r='1'/%3E%3C/g%3E%3C/svg%3E");
+      z-index: 0;
+    }
+
+    .orb {
+      position: fixed;
+      border-radius: 999px;
+      filter: blur(18px);
+      opacity: 0.11;
+      pointer-events: none;
+      z-index: 0;
+      animation: drift 18s ease-in-out infinite;
+    }
+
+    .orb.one {
+      width: 150px;
+      height: 150px;
+      left: 6%;
+      top: 110px;
+      background: rgba(215, 176, 131, 0.78);
+    }
+
+    .orb.two {
+      width: 120px;
+      height: 120px;
+      right: 7%;
+      top: 39vh;
+      background: rgba(185, 133, 88, 0.72);
+      animation-delay: -6s;
+    }
+
+    .orb.three {
+      width: 96px;
+      height: 96px;
+      left: 18%;
+      bottom: 58px;
+      background: rgba(238, 215, 188, 0.78);
+      animation-delay: -11s;
+    }
+
+    @keyframes drift {
+      0%, 100% { transform: translate3d(0, 0, 0); }
+      50% { transform: translate3d(14px, -18px, 0); }
+    }
+
+    .site {
+      position: relative;
+      z-index: 1;
+    }
+
+    .scroll-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      transform-origin: left center;
+      transform: scaleX(var(--scroll-progress, 0));
+      background: linear-gradient(90deg, rgba(212, 177, 142, 0.4), var(--accent), #e1c2a4);
+      box-shadow: 0 8px 26px rgba(125, 86, 54, 0.26);
+      z-index: 30;
+      pointer-events: none;
+    }
+
+    .section {
+      width: min(calc(100% - 32px), var(--max));
+      margin: 0 auto;
+      padding: 88px 0;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      margin-bottom: 18px;
+      border: 1px solid rgba(125, 86, 54, 0.14);
+      border-radius: 999px;
+      background: rgba(255, 250, 244, 0.6);
+      color: var(--accent-deep);
+      font-size: 0.9rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #d4b18e);
+      box-shadow: 0 0 0 5px rgba(164, 116, 70, 0.14);
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      font-family: "Playfair Display", serif;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+    }
+
+    h1 {
+      font-size: clamp(3rem, 8vw, 6.5rem);
+      max-width: 10ch;
+    }
+
+    h2 {
+      font-size: clamp(2.2rem, 4.5vw, 3.6rem);
+      margin-bottom: 18px;
+    }
+
+    h3 {
+      font-size: 1.6rem;
+      margin-bottom: 10px;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.75;
+      font-size: 1.02rem;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(300px, 0.95fr);
+      gap: 38px;
+      align-items: center;
+      min-height: 100vh;
+      padding-top: 34px;
+      padding-bottom: 34px;
+    }
+
+    .hero-copy p {
+      max-width: 58ch;
+      margin-top: 22px;
+      font-size: 1.08rem;
+    }
+
+    body.is-embedded .hero {
+      align-items: start;
+      min-height: auto;
+      padding-top: 16px;
+      padding-bottom: 48px;
+    }
+
+    body.is-embedded .hero-copy {
+      padding-top: 6px;
+    }
+
+    body.is-embedded .hero-visual {
+      min-height: 620px;
+    }
+
+    .hero-copy > * {
+      opacity: 0;
+      transform: translateY(26px);
+      animation: introRise 900ms cubic-bezier(.2,.8,.2,1) forwards;
+    }
+
+    .hero-copy > *:nth-child(1) { animation-delay: 140ms; }
+    .hero-copy > *:nth-child(2) { animation-delay: 260ms; }
+    .hero-copy > *:nth-child(3) { animation-delay: 380ms; }
+    .hero-copy > *:nth-child(4) { animation-delay: 500ms; }
+
+    @keyframes introRise {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 32px;
+    }
+
+    .btn,
+    .btn-secondary {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 56px;
+      padding: 0 26px;
+      border-radius: 18px;
+      border: 0;
+      cursor: pointer;
+      transition: transform 220ms ease, box-shadow 220ms ease, background 220ms ease;
+      isolation: isolate;
+      overflow: hidden;
+    }
+
+    .btn {
+      color: var(--ink);
+      background: rgba(255, 252, 247, 0.94);
+      border: 1px solid rgba(125, 86, 54, 0.14);
+      box-shadow: 0 12px 28px rgba(74, 54, 38, 0.08);
+    }
+
+    .btn::before,
+    .btn-secondary::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent 25%, rgba(255, 255, 255, 0.38) 50%, transparent 75%);
+      transform: translateX(-120%);
+      transition: transform 620ms ease;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .btn:hover,
+    .btn:focus-visible,
+    .btn-secondary:hover,
+    .btn-secondary:focus-visible {
+      transform: translateY(-2px);
+    }
+
+    .btn:hover::before,
+    .btn:focus-visible::before,
+    .btn-secondary:hover::before,
+    .btn-secondary:focus-visible::before {
+      transform: translateX(120%);
+    }
+
+    .btn:focus-visible,
+    .btn-secondary:focus-visible,
+    .panel-close:focus-visible,
+    .service-card:focus-visible {
+      outline: 3px solid rgba(164, 116, 70, 0.28);
+      outline-offset: 3px;
+    }
+
+    .btn-secondary {
+      border: 1px solid rgba(125, 86, 54, 0.16);
+      background: rgba(255, 252, 247, 0.94);
+      color: var(--ink);
+      box-shadow: 0 12px 30px rgba(74, 54, 38, 0.08);
+    }
+
+    .btn-category {
+      border: 1px solid transparent;
+      font-weight: 600;
+    }
+
+    .btn-interieur {
+      background: linear-gradient(145deg, rgba(244, 235, 224, 0.98), rgba(231, 214, 194, 0.96));
+      color: #4a3628;
+      border-color: rgba(150, 116, 82, 0.24);
+      box-shadow: 0 14px 28px rgba(110, 82, 56, 0.12);
+    }
+
+    .btn-fassade {
+      background: linear-gradient(145deg, rgba(238, 225, 206, 0.98), rgba(224, 204, 177, 0.96));
+      color: #4f3a2a;
+      border-color: rgba(150, 116, 82, 0.26);
+      box-shadow: 0 14px 30px rgba(110, 82, 56, 0.14);
+    }
+
+    .btn-category small {
+      display: block;
+      margin-top: 2px;
+      font-size: 0.76rem;
+      font-weight: 500;
+      opacity: 0.78;
+      line-height: 1.2;
+    }
+
+    .hero-visual {
+      position: relative;
+      min-height: 680px;
+      perspective: 1200px;
+      isolation: isolate;
+    }
+
+    .hero-frame {
+      position: absolute;
+      inset: 52px 0 0 62px;
+      border-radius: 34px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transform: translate3d(0, var(--parallax, 0px), 0) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+      transition: transform 120ms linear;
+      z-index: 1;
+      will-change: transform;
+      backface-visibility: hidden;
+    }
+
+    .hero-frame::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(255, 249, 241, 0.03), rgba(33, 23, 16, 0.18)),
+        radial-gradient(circle at 20% 15%, rgba(255, 255, 255, 0.35), transparent 24%);
+      pointer-events: none;
+    }
+
+    .hero-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scale(var(--media-scale, 1.04));
+      transition: transform 180ms linear;
+    }
+
+    .hero-card,
+    .hero-note {
+      position: absolute;
+      backdrop-filter: blur(16px);
+      background: linear-gradient(180deg, rgba(255, 251, 246, 0.92), rgba(250, 240, 228, 0.84));
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      box-shadow: 0 22px 54px rgba(75, 54, 38, 0.18);
+      transform: translate3d(0, var(--card-shift, 0px), 0);
+      z-index: 3;
+      will-change: transform;
+      backface-visibility: hidden;
+    }
+
+    .hero-card {
+      left: 0;
+      bottom: 48px;
+      width: min(280px, 74%);
+      padding: 24px;
+      border-radius: 24px;
+      animation: floatCard 10s ease-in-out infinite;
+    }
+
+    .hero-note {
+      right: 12px;
+      top: 0;
+      width: 220px;
+      padding: 20px 18px;
+      border-radius: 22px;
+      animation: floatCard 12s ease-in-out infinite reverse;
+    }
+
+    .hero-note strong,
+    .hero-card {
+      color: var(--ink);
+    }
+
+    .hero-note strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 1rem;
+      letter-spacing: 0.01em;
+    }
+
+    .hero-note p {
+      color: #4d3d31;
+      font-size: 0.96rem;
+      line-height: 1.58;
+    }
+
+    @keyframes floatCard {
+      0%, 100% { transform: translate3d(0, var(--card-shift, 0px), 0); }
+      50% { transform: translate3d(0, calc(var(--card-shift, 0px) - 7px), 0); }
+    }
+
+    .hero-stat {
+      font-family: "Playfair Display", serif;
+      font-size: 2.6rem;
+      color: var(--accent-deep);
+      margin-bottom: 10px;
+    }
+
+    .showcase {
+      display: grid;
+      grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+      gap: 34px;
+      align-items: center;
+    }
+
+    .showcase-copy {
+      padding: 8px 0;
+    }
+
+    .compare-copy {
+      min-height: 170px;
+    }
+
+    .compare-card {
+      position: relative;
+      padding: 22px;
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      border: 1px solid rgba(121, 90, 63, 0.12);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .compare-card::before {
+      content: "";
+      position: absolute;
+      inset: -20% auto auto -10%;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.26), transparent 68%);
+      opacity: 0.9;
+      pointer-events: none;
+    }
+
+    .compare-shell {
+      position: relative;
+      width: min(100%, 980px);
+      margin: 0 auto 18px;
+      aspect-ratio: var(--compare-aspect, 4 / 3);
+      height: auto;
+      border-radius: 22px;
+      overflow: hidden;
+      background: linear-gradient(180deg, #efe6da, #e2d1bf);
+      box-shadow: inset 0 0 0 1px rgba(255, 250, 244, 0.18);
+      --comparison: 52%;
+    }
+
+    .compare-shell img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center center;
+      transform: none;
+    }
+
+    .compare-overlay {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      clip-path: inset(0 calc(100% - var(--comparison, 52%)) 0 0);
+    }
+
+    .compare-overlay img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center center;
+      transform: scale(0.96);
+    }
+
+    .compare-line {
+      position: absolute;
+      inset: 0 auto 0 var(--comparison, 52%);
+      width: 3px;
+      background: rgba(255, 255, 255, 0.82);
+      transform: translateX(-50%);
+      z-index: 4;
+      pointer-events: none;
+    }
+
+    .compare-line::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      background:
+        linear-gradient(145deg, rgba(255, 251, 246, 0.98), rgba(243, 229, 214, 0.94));
+      border: 1px solid rgba(125, 86, 54, 0.16);
+      box-shadow: 0 14px 28px rgba(49, 34, 22, 0.18);
+    }
+
+    .compare-line span {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+      width: 58px;
+      height: 58px;
+      transform: translate(-50%, -50%);
+      z-index: 1;
+      color: transparent;
+      font-size: 0;
+      font-weight: 700;
+    }
+
+    .compare-line span::before {
+      content: "\2194";
+      color: var(--accent-deep);
+      font-size: 1.2rem;
+      line-height: 1;
+    }
+
+    .compare-scrim {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(20, 14, 9, 0.08), rgba(20, 14, 9, 0.26)),
+        linear-gradient(90deg, rgba(20, 14, 9, 0.18), transparent 18%, transparent 82%, rgba(20, 14, 9, 0.18));
+      pointer-events: none;
+    }
+
+    .compare-line::after {
+      content: "Nachher / Vorher";
+      position: absolute;
+      top: 22px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 9px 12px;
+      border-radius: 999px;
+      white-space: nowrap;
+      background: rgba(47, 36, 29, 0.74);
+      color: #fff;
+      font-size: 0.8rem;
+      letter-spacing: 0.04em;
+    }
+
+    .compare-range {
+      position: absolute;
+      inset: 0;
+      z-index: 6;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      appearance: none;
+      background: transparent;
+      cursor: ew-resize;
+      opacity: 0;
+      touch-action: none;
+    }
+
+    .compare-chip {
+      position: absolute;
+      bottom: 18px;
+      z-index: 3;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 0.84rem;
+      letter-spacing: 0.04em;
+      color: #fff;
+      background: rgba(47, 36, 29, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      backdrop-filter: blur(10px);
+    }
+
+    .compare-chip.before {
+      left: 18px;
+    }
+
+    .compare-chip.after {
+      right: 18px;
+    }
+
+    .compare-meter {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .compare-meter-bar {
+      position: relative;
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(125, 86, 54, 0.12);
+    }
+
+    .compare-meter-bar span {
+      display: block;
+      height: 100%;
+      width: var(--meter-progress, 52%);
+      border-radius: inherit;
+      background: linear-gradient(90deg, #d2ad86, var(--accent), var(--accent-deep));
+      transition: width 120ms linear;
+    }
+
+    .compare-meter-labels {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 26px;
+    }
+
+    .service-card {
+      position: relative;
+      overflow: hidden;
+      padding: 24px;
+      min-height: 420px;
+      border: 0;
+      text-align: left;
+      border-radius: var(--radius-lg);
+      background: transparent;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      isolation: isolate;
+      transition: transform 360ms ease, box-shadow 360ms ease;
+    }
+
+    .service-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(26, 17, 12, 0.08) 0%, rgba(26, 17, 12, 0.78) 100%);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .service-card img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 520ms ease;
+    }
+
+    .service-card:hover img,
+    .service-card:focus-visible img {
+      transform: scale(1.08);
+    }
+
+    .service-card:hover,
+    .service-card:focus-visible {
+      transform: translateY(-8px);
+      box-shadow: 0 34px 72px rgba(58, 40, 24, 0.24);
+    }
+
+    .service-card-content {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      height: 100%;
+      color: #fff8f1;
+    }
+
+    .service-meta {
+      margin-top: 12px;
+      font-size: 0.95rem;
+      color: rgba(255, 248, 241, 0.82);
+    }
+
+    .process {
+      display: grid;
+      grid-template-columns: minmax(320px, 0.85fr) minmax(0, 1.15fr);
+      gap: 36px;
+      align-items: center;
+    }
+
+    .process-media {
+      position: relative;
+      padding: 24px;
+      border-radius: 36px;
+      background: linear-gradient(180deg, rgba(255, 250, 245, 0.72), rgba(255, 244, 234, 0.92));
+      border: 1px solid rgba(125, 86, 54, 0.12);
+      box-shadow: var(--shadow);
+      transform: translateY(var(--parallax-soft, 0px));
+    }
+
+    .badge {
+      position: absolute;
+      right: 10px;
+      bottom: 14px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(47, 36, 29, 0.84);
+      color: #fff8f1;
+      font-size: 0.92rem;
+      max-width: 220px;
+    }
+
+    .round-big {
+      width: min(100%, 420px);
+      aspect-ratio: 1;
+      margin: 0 auto;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 8px solid rgba(255, 248, 241, 0.85);
+      box-shadow: 0 30px 60px rgba(78, 56, 39, 0.18);
+    }
+
+    .round-big img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .steps {
+      display: grid;
+      gap: 16px;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 16px;
+      align-items: start;
+      padding: 20px;
+      border-radius: 20px;
+      background: rgba(255, 251, 246, 0.74);
+      border: 1px solid var(--line);
+      transition: transform 280ms ease, box-shadow 280ms ease, border-color 280ms ease;
+    }
+
+    .step:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 18px 40px rgba(59, 40, 24, 0.08);
+      border-color: rgba(164, 116, 70, 0.22);
+    }
+
+    .step-index {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .cta {
+      text-align: center;
+      padding-top: 60px;
+      padding-bottom: 110px;
+    }
+
+    .cta-shell {
+      padding: 42px 24px;
+      border-radius: 34px;
+      background:
+        linear-gradient(135deg, rgba(170, 124, 79, 0.15), rgba(255, 248, 241, 0.82)),
+        rgba(255, 250, 244, 0.75);
+      border: 1px solid rgba(121, 90, 63, 0.12);
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-shell::before {
+      content: "";
+      position: absolute;
+      inset: auto -12% -50% auto;
+      width: 340px;
+      height: 340px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(226, 195, 162, 0.34), transparent 70%);
+      pointer-events: none;
+    }
+
+    .panel {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgba(28, 20, 15, 0.46);
+      backdrop-filter: blur(10px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 260ms ease;
+      z-index: 20;
+    }
+
+    .panel.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .panel-shell {
+      position: relative;
+      width: min(100%, 1220px);
+      max-height: min(90vh, 980px);
+      overflow: auto;
+      padding: 34px;
+      border-radius: 34px;
+      background: linear-gradient(180deg, rgba(255, 252, 248, 0.96), rgba(249, 242, 233, 0.96));
+      box-shadow: 0 40px 100px rgba(26, 17, 12, 0.32);
+      transform: translateY(36px) scale(0.975);
+      opacity: 0;
+      transition: transform 520ms cubic-bezier(.2,.8,.2,1), opacity 420ms ease;
+    }
+
+    .panel.active .panel-shell {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+
+    .panel-close {
+      position: sticky;
+      top: 0;
+      margin-left: auto;
+      display: grid;
+      place-items: center;
+      width: 48px;
+      height: 48px;
+      border: 0;
+      border-radius: 50%;
+      background: rgba(47, 36, 29, 0.88);
+      color: #fff;
+      cursor: pointer;
+      z-index: 2;
+    }
+
+    .panel-grid {
+      display: grid;
+      gap: 24px;
+      margin-top: 14px;
+    }
+
+    .panel-jumpnav {
+      position: static;
+      top: auto;
+      z-index: 2;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      width: fit-content;
+      max-width: 100%;
+      margin: 18px 0 12px;
+      padding: 10px;
+      border-radius: 18px;
+      background: rgba(255, 248, 241, 0.82);
+      border: 1px solid rgba(125, 86, 54, 0.12);
+      box-shadow: 0 14px 32px rgba(66, 46, 31, 0.08);
+      backdrop-filter: blur(14px);
+    }
+
+    .panel-jump {
+      border: 0;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255, 252, 247, 0.95);
+      color: var(--ink);
+      cursor: pointer;
+      box-shadow: inset 0 0 0 1px rgba(125, 86, 54, 0.1);
+      transition: transform 220ms ease, box-shadow 220ms ease, background 220ms ease;
+      white-space: nowrap;
+    }
+
+    .panel-jump:hover,
+    .panel-jump:focus-visible {
+      transform: translateY(-1px);
+      background: linear-gradient(145deg, rgba(246, 235, 223, 0.96), rgba(255, 250, 244, 0.98));
+      box-shadow: inset 0 0 0 1px rgba(125, 86, 54, 0.14), 0 10px 22px rgba(66, 46, 31, 0.08);
+      outline: none;
+    }
+
+    .panel > .panel-shell > .eyebrow,
+    .panel > .panel-shell > h2 {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 520ms ease, transform 520ms cubic-bezier(.2,.8,.2,1);
+    }
+
+    .panel.active > .panel-shell > .eyebrow {
+      opacity: 1;
+      transform: translateY(0);
+      transition-delay: 110ms;
+    }
+
+    .panel.active > .panel-shell > h2 {
+      opacity: 1;
+      transform: translateY(0);
+      transition-delay: 180ms;
+    }
+
+    .panel-item {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: center;
+      padding: 20px;
+      border-radius: 24px;
+      background: rgba(255, 250, 244, 0.85);
+      border: 1px solid rgba(125, 86, 54, 0.12);
+      opacity: 0;
+      transform: translateY(42px);
+      transition: opacity 700ms ease, transform 700ms cubic-bezier(.2,.8,.2,1), box-shadow 360ms ease;
+    }
+
+    .panel.active .panel-item {
+      opacity: 1;
+      transform: translateY(0);
+      box-shadow: 0 18px 50px rgba(58, 40, 24, 0.1);
+    }
+
+    .panel.active .panel-item:nth-child(1) {
+      transition-delay: 220ms;
+    }
+
+    .panel.active .panel-item:nth-child(2) {
+      transition-delay: 340ms;
+    }
+
+    .panel-item:nth-child(even) .panel-text {
+      order: -1;
+    }
+
+    .panel-item img {
+      width: 100%;
+      border-radius: 20px;
+      min-height: 280px;
+      object-fit: cover;
+      opacity: 0;
+      transform: scale(1.08);
+      transition: opacity 760ms ease, transform 900ms cubic-bezier(.2,.8,.2,1);
+    }
+
+    .panel.active .panel-item img {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .panel-text {
+      opacity: 0;
+      transform: translateX(26px);
+      transition: opacity 680ms ease, transform 680ms cubic-bezier(.2,.8,.2,1);
+    }
+
+    .panel-item:nth-child(even) .panel-text {
+      transform: translateX(-26px);
+    }
+
+    .panel.active .panel-text {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .panel-text h3,
+    .panel-text p {
+      opacity: 0;
+      transform: translateY(14px);
+      transition: opacity 520ms ease, transform 520ms ease;
+    }
+
+    .panel.active .panel-text h3,
+    .panel.active .panel-text p {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .panel.active .panel-text h3 {
+      transition-delay: 340ms;
+    }
+
+    .panel.active .panel-text p {
+      transition-delay: 430ms;
+    }
+
+    .fade {
+      opacity: 0;
+      transform: translateY(44px);
+      transition: opacity 700ms ease, transform 700ms ease;
+    }
+
+    .fade.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .reveal-stagger > * {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 700ms ease, transform 700ms ease;
+    }
+
+    .reveal-stagger.show > * {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .reveal-stagger.show > *:nth-child(1) { transition-delay: 80ms; }
+    .reveal-stagger.show > *:nth-child(2) { transition-delay: 160ms; }
+    .reveal-stagger.show > *:nth-child(3) { transition-delay: 240ms; }
+    .reveal-stagger.show > *:nth-child(4) { transition-delay: 320ms; }
+    .reveal-stagger.show > *:nth-child(5) { transition-delay: 400ms; }
+    .reveal-stagger.show > *:nth-child(6) { transition-delay: 480ms; }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 1024px) {
+      .hero,
+      .showcase,
+      .process,
+      .panel-item {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        min-height: auto;
+        padding-top: 84px;
+      }
+
+      .hero-visual {
+        min-height: 560px;
+      }
+
+      .hero-frame {
+        inset: 60px 0 0 0;
+      }
+
+      .hero-note {
+        right: 20px;
+      }
+
+      .step:hover {
+        transform: none;
+        box-shadow: none;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .section {
+        width: min(calc(100% - 24px), var(--max));
+        padding: 68px 0;
+      }
+
+      .services-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-visual {
+        min-height: 440px;
+        perspective: 900px;
+      }
+
+      .hero-card,
+      .hero-note {
+        position: absolute;
+        width: auto;
+        max-width: calc(100% - 30px);
+        animation: none;
+      }
+
+      .hero-card {
+        left: 14px;
+        right: auto;
+        bottom: 14px;
+        width: min(232px, calc(100% - 34px));
+        padding: 16px 16px 15px;
+        backdrop-filter: blur(12px);
+      }
+
+      .hero-note {
+        top: 14px;
+        right: 14px;
+        width: min(188px, calc(100% - 28px));
+        padding: 14px 14px 13px;
+        backdrop-filter: blur(12px);
+      }
+
+      .hero-note p,
+      .hero-card p {
+        font-size: 0.88rem;
+        line-height: 1.45;
+      }
+
+      .hero-stat {
+        font-size: 2rem;
+        margin-bottom: 6px;
+      }
+
+      .compare-card,
+      .panel-shell {
+        padding: 18px;
+      }
+
+      .compare-shell {
+        width: 100%;
+        aspect-ratio: var(--compare-aspect, 4 / 5);
+        max-height: 78vh;
+      }
+
+      .compare-line::before,
+      .compare-line span {
+        width: 50px;
+        height: 50px;
+      }
+
+      .compare-line::after {
+        top: 16px;
+        font-size: 0.74rem;
+      }
+
+      .compare-copy {
+        min-height: auto;
+      }
+
+      .compare-chip {
+        bottom: 12px;
+        padding: 8px 12px;
+      }
+
+      .panel-item {
+        padding: 14px;
+      }
+
+      .panel-item:nth-child(even) .panel-text {
+        order: 0;
+      }
+
+      .panel-jumpnav {
+        position: static;
+        top: auto;
+        width: 100%;
+        margin-top: 14px;
+        margin-bottom: 18px;
+        padding: 8px;
+        gap: 8px;
+        overflow-x: auto;
+        box-shadow: 0 10px 24px rgba(66, 46, 31, 0.06);
+      }
+
+      .panel-jump {
+        padding: 9px 12px;
+        font-size: 0.92rem;
+        flex: 0 0 auto;
+      }
+
+      .orb.two,
+      .orb.three {
+        display: none;
+      }
+
+      .orb.one {
+        width: 72px;
+        height: 72px;
+        top: 92px;
+        left: 12px;
+        opacity: 0.08;
+      }
+
+      .grain {
+        opacity: 0.035;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      *, *::before, *::after {
+        animation: none !important;
+        transition-duration: 0.01ms !important;
+        transition-delay: 0ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="scroll-progress" aria-hidden="true"></div>
+  <div class="grain"></div>
+  <div class="orb one"></div>
+  <div class="orb two"></div>
+  <div class="orb three"></div>
+
+  <main class="site">
+    <section class="section hero fade">
+      <div class="hero-copy">
+        <span class="eyebrow">Innenraum und Fassade</span>
+        <h1>Räume mit Haltung. Fassaden mit Charakter.</h1>
+        <p>
+          Wir gestalten Innenräume und Fassaden so, dass Material, Farbe und Bestand sauber zusammenpassen.
+          Ob Treppenhaus, Flur oder Außenansicht: Das Ergebnis soll nicht nach Vorlage aussehen, sondern nach Ihrem Gebäude.
+        </p>
+        <div class="hero-actions">
+          <button class="btn" type="button" data-scroll-target="#leistungen">Projekt starten</button>
+          <button class="btn-secondary" type="button" data-scroll-target="#vorher-nachher">Referenzen ansehen</button>
+        </div>
+      </div>
+
+      <div class="hero-visual" aria-hidden="true">
+        <div class="hero-note" data-depth="-0.1">
+          <strong>Konzept bis Finish</strong>
+          <p>Von der ersten Idee bis zur Ausführung bleiben Gestaltung und Handwerk aufeinander abgestimmt.</p>
+        </div>
+        <div class="hero-frame" data-parallax data-depth="0.16">
+          <img src="https://i.imgur.com/GFz9fuk.png" alt="Architektonische Außenansicht mit moderner Oberflächengestaltung">
+        </div>
+        <div class="hero-card" data-depth="0.22">
+          <div class="hero-stat">+60</div>
+          <p>begleitete Projekte, bei denen Gestaltung, Untergrund und Ausführung gemeinsam gedacht wurden.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section fade" id="leistungen">
+      <span class="eyebrow">Leistungen</span>
+      <h2>Ausgewählte Arbeitsbereiche</h2>
+      <div class="services-grid">
+        <button class="service-card" type="button" data-panel-target="interieur-panel">
+          <img src="https://i.imgur.com/g4l8ZXi.png" alt="Stilvoll gestalteter Innenraum">
+          <span class="service-card-content">
+            <h3>Interieur</h3>
+            <p class="service-meta">Treppenhäuser, Flure und Wohnbereiche mit Farben und Materialien, die im Alltag funktionieren und gut aussehen.</p>
+          </span>
+        </button>
+
+        <button class="service-card" type="button" data-panel-target="fassade-panel">
+          <img src="https://i.imgur.com/zzW8X49.jpeg" alt="Hochwertig sanierte Hausfassade">
+          <span class="service-card-content">
+            <h3>Fassade</h3>
+            <p class="service-meta">Fassadenkonzepte, die zum Bestand passen, sauber ausgeführt werden und auch nach Jahren stimmig wirken.</p>
+          </span>
+        </button>
+      </div>
+    </section>
+
+    <section class="section showcase fade" id="vorher-nachher">
+      <div class="showcase-copy compare-copy">
+        <span class="eyebrow">Transformation</span>
+        <h2>Substanz bewahren, Wirkung neu definieren.</h2>
+        <p id="compareNarrative">
+          Die Fassade vorher zeigt abgeblätterte Farbe, alte Spuren der entfernten Begrünung, deutliche Risse und verschmutzte Bereiche, durch die Feuchtigkeit leichter eindringen kann.
+        </p>
+      </div>
+
+      <div class="compare-card">
+        <div class="compare-shell" id="compareShell">
+          <img src="https://i.imgur.com/2RUtTib.jpeg" alt="Ausgangszustand einer Fassade vor der Umgestaltung">
+          <div class="compare-overlay" id="compareOverlay">
+            <img src="https://i.imgur.com/zzW8X49.jpeg" alt="Neu gestaltete Fassade nach der Umgestaltung">
+          </div>
+          <div class="compare-scrim"></div>
+          <div class="compare-chip before">Nachher</div>
+          <div class="compare-chip after">Vorher</div>
+          <div class="compare-line" id="compareLine" aria-hidden="true"><span>↔</span></div>
+          <input
+            class="compare-range"
+            id="compareRange"
+            type="range"
+            min="0"
+            max="100"
+            value="12"
+            aria-label="Vorher-Nachher-Slider"
+          >
+        </div>
+        <p>Der Kontrast macht deutlich, wie stark Instandsetzung, neue Farbigkeit und ein sauberer Aufbau die Wirkung eines Altbaus von 1902 verändern können.</p>
+        <div class="compare-meter" aria-hidden="true">
+          <div class="compare-meter-bar"><span id="compareMeter"></span></div>
+          <div class="compare-meter-labels">
+            <span>Original</span>
+            <span>Transformation</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section process fade">
+      <div class="process-media" data-parallax-soft>
+        <div class="round-big">
+          <img src="https://i.imgur.com/ZTjVg1B.png" alt="Material- und Farbdetails als Teil der Gestaltungsplanung">
+        </div>
+        <div class="badge">Planung, Muster und Kosten werden vorab so geklärt, dass es später auf der Baustelle keine Überraschungen gibt.</div>
+      </div>
+
+      <div>
+        <span class="eyebrow">Arbeitsweise</span>
+        <h2>Wie wir Projekte führen</h2>
+        <div class="steps fade reveal-stagger">
+          <article class="step">
+            <div class="step-index">1</div>
+            <div>
+              <h3>Persönliche Beratung</h3>
+              <p>Wir schauen uns an, wie der Bereich genutzt wird, welche Materialien vorhanden sind und was am Ende wirklich gewünscht ist.</p>
+            </div>
+          </article>
+
+          <article class="step">
+            <div class="step-index">2</div>
+            <div>
+              <h3>Material- und Farbkonzept</h3>
+              <p>Danach schlagen wir Farben und Oberflächen vor, die zum Licht, zum Bestand und zum späteren Pflegeaufwand passen.</p>
+            </div>
+          </article>
+
+          <article class="step">
+            <div class="step-index">3</div>
+            <div>
+              <h3>Muster und Probeanstriche</h3>
+              <p>Mit Mustern direkt am Objekt lässt sich besser entscheiden als am Bildschirm oder auf kleinen Farbkarten.</p>
+            </div>
+          </article>
+
+          <article class="step">
+            <div class="step-index">4</div>
+            <div>
+              <h3>Planung und Umsetzung</h3>
+              <p>Wenn das Konzept steht, folgt die Umsetzung mit klaren Abläufen, nachvollziehbaren Kosten und sauberer Ausführung.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section cta fade">
+      <div class="cta-shell">
+        <span class="eyebrow">Nächster Schritt</span>
+        <h2>Welcher Bereich interessiert Sie zuerst?</h2>
+        <p>Sie können direkt in die Beispiele für Innenraum oder Fassade springen und sehen, wie die Gestaltung im Detail wirkt.</p>
+        <div class="hero-actions" style="justify-content:center;">
+          <button class="btn" type="button" data-panel-target="interieur-panel">Interieur entdecken</button>
+          <button class="btn-secondary" type="button" data-panel-target="fassade-panel">Fassadenbeispiele öffnen</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <section class="panel" id="interieur-panel" aria-hidden="true">
+    <div class="panel-shell">
+      <button class="panel-close" type="button" aria-label="Interieur-Ansicht schließen">&times;</button>
+      <span class="eyebrow">Interieur</span>
+      <h2>Innenräume, die ruhig wirken und im Alltag bestehen</h2>
+      <div class="panel-jumpnav" aria-label="Schnellauswahl Interieur">
+        <button class="panel-jump" type="button" data-panel-scroll-target="interieur-treppe">Treppenhaus</button>
+        <button class="panel-jump" type="button" data-panel-scroll-target="interieur-flur">Flurgestaltung</button>
+        <button class="panel-jump" type="button" data-panel-scroll-target="interieur-wandtechnik">Wandtechniken</button>
+      </div>
+      <div class="panel-grid">
+        <article class="panel-item" id="interieur-treppe">
+          <img src="https://i.imgur.com/qIj54PW.png" alt="Treppe mit renovierter Holzoberfläche und modernem Handlauf">
+          <div class="panel-text">
+            <h3>Treppenrenovierung</h3>
+            <p>Eine Treppe ist mehr als nur ein Weg nach oben sie ist ein zentraler Blickfang in Ihrem Zuhause. Mit unserem fachgerechten Renovierungsservice verwandeln wir alte, abgenutzte Holztreppen in wahre Schmuckstücke. Bei diesem Projekt haben wir die Stufen sorgfältig abgeschliffen und in ihrem natürlichen Holzton neu lackiert, um die warme Struktur und Maserung optimal zur Geltung zu bringen.
+Der Handlauf wurde in einem modernen, eleganten Grauton gestaltet, der perfekt mit den frisch gestrichenen weißen Streben harmoniert. Das Ergebnis ist eine zeitlose Kombination aus Natürlichkeit und Frische, die Ihrem Wohnraum ein helles und einladendes Ambiente verleiht.
+Wir legen großen Wert auf präzises Arbeiten und die Verwendung hochwertiger, nachhaltiger Materialien, damit Ihre Treppe nicht nur schön aussieht, sondern auch langlebig und pflegeleicht bleibt. Vertrauen Sie auf unsere Erfahrung, um aus Ihrer Treppe ein echtes Highlight zu machen, das Stil und Funktion perfekt verbindet.</p>
+          </div>
+        </article>
+
+        <article class="panel-item" id="interieur-flur">
+          <img src="https://i.imgur.com/qATaTRg.jpeg" alt="Flurbereich mit Steinoptik und abgestimmter Wandgestaltung">
+          <div class="panel-text">
+            <h3>Flurgestaltung</h3>
+            <p>Der Flur empfängt mit einer harmonischen Verbindung aus natürlichen Materialien und edlem Design: Unterhalb erstrecken sich warme Sandsteinfliesen, die mit einer dezenten Aluminiumkante elegant von der darüberliegenden Wand getrennt werden. 
+Diese ist mit einer hochwertigen, leicht glänzenden Fototapete in sattem Grün gestaltet, deren feine Blattstrukturen an einen dichten Dschungel erinnern. Das Zusammenspiel aus der rauen Natürlichkeit des Sandsteins und dem lebendigen, glänzenden Blattwerk schafft eine stilvolle und zugleich einladende Atmosphäre ein grüner Weg, der den Flur in eine kleine, luxuriöse Oase verwandelt und Besucher sofort in seinen Bann zieht. 
+Eindruck.</p>
+          </div>
+        </article>
+
+        <article class="panel-item" id="interieur-wandtechnik">
+          <img src="https://i.imgur.com/TnwFnkH.jpeg" alt="Dekorative Wandtechnik mit strukturierter Oberfläche">
+          <div class="panel-text">
+            <h3>Dekorative Wandtechniken & kreative Oberflächen</h3>
+            <p>Wir gestalten individuelle Wandoberflächen mit modernen und klassischen Maltechniken. Durch Wisch-, Lasur- und Strukturtechniken entstehen lebendige Flächen mit Tiefe, Charakter und einer hochwertigen Wirkung. Jede Oberfläche wird dabei auf den Raum, das Licht und die gewünschte Stimmung abgestimmt. Gerade im Wohn- und Objektbereich sorgen solche Techniken für eine besondere Atmosphäre, ohne aufdringlich zu wirken. Die Ausführung erfolgt sauber, gleichmäßig und handwerklich präzise. Auf Wunsch kombinieren wir mehrere Techniken, damit eine noch individuellere Oberfläche entsteht und jede Wand eine eigene Handschrift bekommt.</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="fassade-panel" aria-hidden="true">
+    <div class="panel-shell">
+      <button class="panel-close" type="button" aria-label="Fassaden-Ansicht schließen">&times;</button>
+      <span class="eyebrow">Fassade</span>
+      <h2>Fassaden, die zum Haus passen und es sichtbar aufwerten</h2>
+      <div class="panel-grid">
+        <article class="panel-item">
+          <img src="https://i.imgur.com/zzW8X49.jpeg" alt="Gelb gestaltete Fassade mit sauberem Finish">
+          <div class="panel-text">
+            <h3>Frisches Farbkonzept</h3>
+            <p>Mit einem frischen Gelb erstrahlt Ihre Fassade in neuem Glanz und sorgt für gute Laune außen wie innen! Wir setzen Ihre Wünsche mit hochwertigen Farben und perfektem Finish um. Robust, langlebig und ein echter Hingucker. Entscheidend sind saubere Kanten, ein stimmiger Kontrast und ein Aufbau, der dauerhaft hält.</p>
+          </div>
+        </article>
+
+        <article class="panel-item">
+          <img src="https://i.imgur.com/Lsp5Sqf.png" alt="Fassade mit heller, eleganter Neugestaltung">
+          <div class="panel-text">
+            <h3>Eleganz und Bestandsbezug</h3>
+            <p>Auch eine hellere, modernere Fassade darf ihren Charakter behalten. Gute Gestaltung stärkt den Bestand, statt ihn zu überdecken. Verleihen Sie Ihrem Haus neuen Glanz mit unserer professionellen Fassadengestaltung. Ob Modernisierung, Schutz oder optische Aufwertung  wir bieten maßgeschneiderte Lösungen aus einer Hand. Hochwertige Materialien, präzise Verarbeitung und termingerechte Umsetzung garantiert! 
+ </p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const root = document.documentElement;
+    let isEmbedded = false;
+
+    try {
+      isEmbedded = window.self !== window.top;
+    } catch (error) {
+      isEmbedded = true;
+    }
+
+    if (isEmbedded) {
+      document.body.classList.add("is-embedded");
+      window.scrollTo(0, 0);
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("show");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.16 });
+
+    document.querySelectorAll(".fade").forEach((element) => observer.observe(element));
+
+    const parallaxNodes = document.querySelectorAll("[data-parallax]");
+    const parallaxSoftNodes = document.querySelectorAll("[data-parallax-soft]");
+    const depthNodes = document.querySelectorAll("[data-depth]");
+
+    const compareShell = document.getElementById("compareShell");
+    const compareOverlay = document.getElementById("compareOverlay");
+    const compareMeter = document.getElementById("compareMeter");
+    const compareNarrative = document.getElementById("compareNarrative");
+    const compareRange = document.getElementById("compareRange");
+    const compareSummary = document.querySelector(".compare-card > p");
+    const compareImages = compareShell ? compareShell.querySelectorAll("img") : [];
+
+    const syncCompareAspect = () => {
+      if (!compareShell || !compareImages.length) return;
+      const ratios = Array.from(compareImages)
+        .map((image) => image.naturalWidth && image.naturalHeight ? image.naturalWidth / image.naturalHeight : 0)
+        .filter(Boolean);
+
+      if (!ratios.length) return;
+
+      compareShell.style.setProperty("--compare-aspect", Math.max(...ratios).toFixed(4));
+    };
+
+    const updateComparison = (value) => {
+      const safeValue = Math.min(Math.max(Number(value), 0), 100);
+      const progress = safeValue / 100;
+      compareShell.style.setProperty("--comparison", safeValue + "%");
+      compareMeter.style.width = safeValue + "%";
+      compareShell.style.setProperty("--media-scale", 1.02 + progress * 0.04);
+
+      if (compareNarrative) {
+        if (progress < 0.18) {
+          compareNarrative.textContent = "Die Fassade vorher zeigt abgeblätterte Farbe, alte Spuren der entfernten Begrünung, deutliche Risse und verschmutzte Bereiche, durch die Feuchtigkeit leichter eindringen kann.";
+        } else if (progress < 0.48) {
+          compareNarrative.textContent = "Beim Verschieben erkennt man Schritt für Schritt, wie Reparatur, saubere Flächen und neue Farbigkeit den Altbau von 1902 wieder ruhiger und geordneter wirken lassen.";
+        } else if (progress < 0.82) {
+          compareNarrative.textContent = "Im weiteren Verlauf verschwindet der graue, angegriffene Eindruck und die Fassade gewinnt wieder Klarheit, Wärme und einen deutlich gepflegteren Ausdruck.";
+        } else {
+          compareNarrative.textContent = "Die Fassade nachher strahlt in einem warmen Gelbton mit braun abgesetztem Sockel, sauber hervorgehobener Hauszahl 1902 und einer Oberfläche, die wieder witterungsfest, regenfest und hochwertig wirkt.";
+        }
+      }
+
+      if (compareNarrative && progress >= 0.18 && progress < 0.48) {
+        compareNarrative.textContent = "Beim Verschieben erkennt man Schritt für Schritt, wie Reparatur, saubere Flächen und neue Farbigkeit den Altbau von 1902 wieder ruhiger und geordneter wirken lassen.";
+      }
+      if (compareNarrative && progress < 0.18) {
+        compareNarrative.textContent = "Die Fassade vorher zeigt abgeblätterte Farbe, alte Spuren der entfernten Begrünung, deutliche Risse und verschmutzte Bereiche, durch die Feuchtigkeit leichter eindringen kann.";
+      }
+
+      if (compareNarrative && progress >= 0.18 && progress < 0.48) {
+        compareNarrative.textContent = "Beim Verschieben erkennt man Schritt für Schritt, wie Reparatur, saubere Flächen und neue Farbigkeit den Altbau von 1902 wieder ruhiger und geordneter wirken lassen.";
+      }
+
+      if (compareNarrative && progress >= 0.48 && progress < 0.82) {
+        compareNarrative.textContent = "Im weiteren Verlauf verschwindet der graue, angegriffene Eindruck und die Fassade gewinnt wieder Klarheit, Wärme und einen deutlich gepflegteren Ausdruck.";
+      }
+
+      if (compareNarrative && progress >= 0.82) {
+        compareNarrative.textContent = "Die Fassade nachher strahlt in einem warmen Gelbton mit braun abgesetztem Sockel, sauber hervorgehobener Hauszahl 1902 und einer Oberfläche, die wieder witterungsfest, regenfest und hochwertig wirkt.";
+      }
+    };
+
+    if (compareSummary) {
+      compareSummary.textContent = "Der Kontrast macht deutlich, wie stark Instandsetzung, neue Farbigkeit und ein sauberer Aufbau die Wirkung eines Altbaus von 1902 verändern können.";
+    }
+
+    const updateMotion = () => {
+      const scrollTop = window.scrollY || window.pageYOffset;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = docHeight > 0 ? scrollTop / docHeight : 0;
+      const mobileMotion = window.innerWidth <= 720;
+      root.style.setProperty("--scroll-progress", progress.toFixed(4));
+
+      if (!reducedMotion) {
+        parallaxNodes.forEach((node) => {
+          const baseDepth = Number(node.dataset.depth || 0.12);
+          const depth = mobileMotion ? Math.min(baseDepth, 0.045) : baseDepth;
+          node.style.setProperty("--parallax", scrollTop * depth + "px");
+          node.style.setProperty("--tilt-x", mobileMotion ? "0deg" : Math.max(Math.min(scrollTop * 0.002, 2.4), 0) + "deg");
+          node.style.setProperty("--tilt-y", mobileMotion ? "0deg" : Math.sin(scrollTop * 0.002) * 1.4 + "deg");
+          const image = node.querySelector("img");
+          if (image) {
+            image.style.transform = `scale(${(mobileMotion ? 1.02 : 1.04) + progress * (mobileMotion ? 0.03 : 0.06)})`;
+          }
+        });
+
+        parallaxSoftNodes.forEach((node) => {
+          node.style.setProperty("--parallax-soft", scrollTop * (mobileMotion ? 0.018 : 0.05) + "px");
+        });
+
+        depthNodes.forEach((node) => {
+          const depth = Number(node.dataset.depth || 0);
+          node.style.setProperty("--card-shift", mobileMotion ? "0px" : scrollTop * depth * -0.2 + "px");
+        });
+      }
+    };
+
+    if (compareRange) {
+      updateComparison(compareRange.value);
+      compareRange.addEventListener("input", () => {
+        updateComparison(compareRange.value);
+      });
+    }
+
+    compareImages.forEach((image) => {
+      if (image.complete) {
+        syncCompareAspect();
+      } else {
+        image.addEventListener("load", syncCompareAspect, { once: true });
+      }
+    });
+
+    syncCompareAspect();
+
+    updateMotion();
+    window.addEventListener("scroll", updateMotion, { passive: true });
+    window.addEventListener("resize", () => {
+      syncCompareAspect();
+      updateMotion();
+    });
+
+    const panels = document.querySelectorAll(".panel");
+    let activePanel = null;
+
+    const setPanelState = (panel, isOpen) => {
+      panel.classList.toggle("active", isOpen);
+      panel.setAttribute("aria-hidden", String(!isOpen));
+    };
+
+    const openPanel = (panelId) => {
+      const panel = document.getElementById(panelId);
+      if (!panel) return;
+      if (activePanel && activePanel !== panel) {
+        closePanel(activePanel);
+      }
+      activePanel = panel;
+      setPanelState(panel, true);
+      document.body.style.overflow = "hidden";
+    };
+
+    const closePanel = (panel) => {
+      if (!panel) return;
+      setPanelState(panel, false);
+      if (activePanel === panel) {
+        activePanel = null;
+      }
+      document.body.style.overflow = "";
+    };
+
+    document.addEventListener("click", (event) => {
+      const closeButton = event.target.closest(".panel-close");
+      if (closeButton) {
+        closePanel(closeButton.closest(".panel"));
+        return;
+      }
+
+      const panelScrollTrigger = event.target.closest("[data-panel-scroll-target]");
+      if (panelScrollTrigger) {
+        const panel = panelScrollTrigger.closest(".panel") || activePanel;
+        const target = panel ? panel.querySelector(`#${panelScrollTrigger.dataset.panelScrollTarget}`) : null;
+        if (target) {
+          target.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
+        }
+        return;
+      }
+
+      const panelTrigger = event.target.closest("[data-panel-target]");
+      if (panelTrigger) {
+        openPanel(panelTrigger.dataset.panelTarget);
+        return;
+      }
+
+      const scrollTrigger = event.target.closest("[data-scroll-target]");
+      if (scrollTrigger) {
+        const target = document.querySelector(scrollTrigger.dataset.scrollTarget);
+        if (target) {
+          target.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
+        }
+      }
+    });
+
+    panels.forEach((panel) => {
+      panel.addEventListener("click", (event) => {
+        if (event.target === panel) {
+          closePanel(panel);
+        }
+      });
+    });
+
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && activePanel) {
+        closePanel(activePanel);
+      }
+    });
+  </script>
+</body>
+</html>
